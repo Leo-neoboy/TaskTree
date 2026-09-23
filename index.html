@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Task Tree</title>
+
+        <link rel="stylesheet" href="style.css" />
+    </head>
+
+    <body>
+        <header class="topbar">
+            <div>
+                <h1>Task Tree</h1>
+                <div id="status">Saved</div>
+            </div>
+
+            <button id="addRoot" class="primary">＋ Task</button>
+        </header>
+
+        <main id="tree"></main>
+
+        <div id="empty" class="empty">
+            <div>No tasks yet</div>
+
+            <button id="emptyAdd" class="primary">Add your first task</button>
+        </div>
+
+        <dialog id="editDialog">
+            <form id="editForm">
+                <h2>Edit Task</h2>
+
+                <input
+                    id="titleInput"
+                    type="text"
+                    maxlength="200"
+                    autocomplete="off"
+                    placeholder="Task title"
+                />
+
+                <div class="actions">
+                    <button type="button" id="cancel">Cancel</button>
+
+                    <button type="submit" class="primary">Save</button>
+                </div>
+            </form>
+        </dialog>
+
+        <script src="app.js"></script>
+    </body>
+</html>

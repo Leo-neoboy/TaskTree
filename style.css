@@ -1,0 +1,329 @@
+* {
+    box-sizing: border-box;
+}
+
+:root {
+    color-scheme: dark;
+
+    --bg: #101114;
+    --surface: #191b20;
+    --border: #30343d;
+
+    --text: #f2f3f5;
+    --muted: #9da3ae;
+
+    --accent: #6ea8fe;
+    --danger: #ff6b6b;
+}
+
+html,
+body {
+    margin: 0;
+    min-height: 100%;
+
+    background: var(--bg);
+    color: var(--text);
+
+    font-family:
+        system-ui,
+        -apple-system,
+        "Segoe UI",
+        sans-serif;
+}
+
+body {
+    padding: env(safe-area-inset-top) 12px env(safe-area-inset-bottom);
+
+    max-width: 900px;
+    margin: auto;
+}
+
+/* =========================
+   TOP BAR
+   ========================= */
+
+.topbar {
+    position: sticky;
+    top: 0;
+
+    z-index: 5;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    padding: 14px 4px;
+
+    background: #101114f5;
+
+    border-bottom: 1px solid var(--border);
+}
+
+h1 {
+    margin: 0;
+    font-size: 20px;
+}
+
+#status {
+    font-size: 12px;
+    color: var(--muted);
+}
+
+/* =========================
+   BUTTONS
+   ========================= */
+
+button {
+    border: 0;
+    border-radius: 8px;
+
+    min-height: 40px;
+
+    padding: 8px 12px;
+
+    background: #20232a;
+    color: var(--text);
+
+    font: inherit;
+}
+
+button:active {
+    transform: scale(0.98);
+}
+
+button.primary {
+    background: var(--accent);
+    color: #08111f;
+
+    font-weight: 600;
+}
+
+/* =========================
+   TASK ROW
+   ========================= */
+
+.node-row {
+    display: grid;
+
+    grid-template-columns:
+        28px
+        40px
+        minmax(0, 1fr)
+        40px
+        40px
+        40px;
+
+    align-items: center;
+
+    min-height: 48px;
+
+    border-radius: 8px;
+}
+
+.node-row:hover {
+    background: var(--surface);
+}
+
+/* =========================
+   EXPAND / COLLAPSE
+   ========================= */
+
+.fold {
+    width: 28px;
+    height: 40px;
+
+    padding: 0;
+
+    background: transparent;
+
+    color: var(--muted);
+
+    font-size: 18px;
+}
+
+/* =========================
+   CHECKBOX
+   ========================= */
+
+.check {
+    width: 40px;
+    height: 40px;
+
+    padding: 0;
+
+    background: transparent;
+
+    color: var(--muted);
+
+    font-size: 21px;
+}
+
+.check.done {
+    color: var(--accent);
+}
+
+/* =========================
+   TASK TITLE
+   ========================= */
+
+.title {
+    min-width: 0;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+
+    white-space: nowrap;
+
+    padding: 6px 4px;
+}
+
+.title.done {
+    color: var(--muted);
+
+    text-decoration: line-through;
+}
+
+/* =========================
+   EDIT BUTTON
+   ========================= */
+
+.edit {
+    width: 40px;
+    height: 40px;
+
+    padding: 0;
+
+    background: transparent;
+
+    color: var(--muted);
+
+    font-size: 18px;
+}
+.delete {
+    width: 40px;
+    height: 40px;
+
+    padding: 0;
+
+    background: transparent;
+
+    color: var(--muted);
+
+    font-size: 17px;
+}
+
+.delete:active {
+    color: var(--danger);
+}
+
+/* =========================
+   ADD CHILD BUTTON
+   ========================= */
+
+.add-child {
+    width: 40px;
+    height: 40px;
+
+    padding: 0;
+
+    background: transparent;
+
+    color: var(--muted);
+
+    font-size: 20px;
+}
+
+/* =========================
+   CHILDREN
+   ========================= */
+
+.node-children {
+    margin-left: 22px;
+
+    border-left: 1px solid var(--border);
+
+    padding-left: 4px;
+}
+
+/* =========================
+   EMPTY STATE
+   ========================= */
+
+.empty {
+    display: none;
+
+    text-align: center;
+
+    color: var(--muted);
+
+    padding: 60px 20px;
+}
+
+.empty.show {
+    display: block;
+}
+
+.empty button {
+    margin-top: 14px;
+}
+
+/* =========================
+   EDIT DIALOG
+   ========================= */
+
+dialog {
+    width: min(92vw, 420px);
+
+    border: 1px solid var(--border);
+
+    border-radius: 14px;
+
+    padding: 20px;
+
+    background: var(--surface);
+
+    color: var(--text);
+}
+
+dialog::backdrop {
+    background: #000a;
+}
+
+dialog h2 {
+    margin-top: 0;
+}
+
+#titleInput {
+    width: 100%;
+
+    min-height: 46px;
+
+    border: 1px solid var(--border);
+
+    border-radius: 8px;
+
+    padding: 10px 12px;
+
+    background: var(--bg);
+
+    color: var(--text);
+
+    font: inherit;
+
+    outline: none;
+}
+
+#titleInput:focus {
+    border-color: var(--accent);
+}
+
+.actions {
+    display: flex;
+
+    justify-content: flex-end;
+
+    gap: 8px;
+
+    margin-top: 16px;
+}
