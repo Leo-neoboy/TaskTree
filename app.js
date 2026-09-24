@@ -4,6 +4,10 @@ const tree = document.getElementById("tree");
 const empty = document.getElementById("empty");
 const status = document.getElementById("status");
 
+const drawer = document.getElementById("drawer");
+const drawerOverlay = document.getElementById("drawerOverlay");
+const drawerToggle = document.getElementById("drawerToggle");
+
 const dialog = document.getElementById("editDialog");
 const form = document.getElementById("editForm");
 const titleInput = document.getElementById("titleInput");
@@ -11,8 +15,23 @@ const cancelButton = document.getElementById("cancel");
 
 let tasks = [];
 let editingTaskId = null;
+let creatingTaskId = null;
 
 loadTasks();
+//load task ends here
+function openDrawer() {
+    drawer.classList.add("open");
+    drawerOverlay.classList.add("open");
+}
+
+function closeDrawer() {
+    drawer.classList.remove("open");
+    drawerOverlay.classList.remove("open");
+}
+
+drawerToggle.addEventListener("click", openDrawer);
+
+drawerOverlay.addEventListener("click", closeDrawer);
 
 /* =========================
    STORAGE
@@ -108,6 +127,20 @@ function removeTask(list, id) {
     }
 
     return false;
+}
+
+/* =========================
+   COUNT DESCENDANTS
+   ========================= */
+
+function countDescendants(task) {
+    let count = task.children.length;
+
+    for (const child of task.children) {
+        count += countDescendants(child);
+    }
+
+    return count;
 }
 
 /* =========================
@@ -287,8 +320,6 @@ function renderTask(task) {
 
     deleteButton.setAttribute("aria-label", "Delete task");
 
-    deleteButton.setAttribute("aria-label", "Delete task");
-
     deleteButton.addEventListener("click", () => {
         deleteTask(task.id);
     });
@@ -339,6 +370,8 @@ function addChildTask(parentId) {
     }
 
     const child = createTask();
+
+    creatingTaskId = child.id;
 
     parent.children.push(child);
 
@@ -397,6 +430,7 @@ form.addEventListener("submit", (event) => {
     dialog.close();
 
     editingTaskId = null;
+    creatingTaskId = null;
 });
 
 /* =========================
@@ -404,6 +438,16 @@ form.addEventListener("submit", (event) => {
    ========================= */
 
 cancelButton.addEventListener("click", () => {
+    if (creatingTaskId) {
+        removeTask(tasks, creatingTaskId);
+
+        saveTasks();
+
+        render();
+
+        creatingTaskId = null;
+    }
+
     dialog.close();
 
     editingTaskId = null;
@@ -415,6 +459,8 @@ cancelButton.addEventListener("click", () => {
 
 function addRootTask() {
     const task = createTask();
+
+    creatingTaskId = task.id;
 
     tasks.push(task);
 

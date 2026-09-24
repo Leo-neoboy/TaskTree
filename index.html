@@ -9,7 +9,28 @@
     </head>
 
     <body>
+        <!-- DRAWER -->
+        <aside id="drawer" class="drawer">
+            <div class="drawer-header">
+                <h2>Folders</h2>
+            </div>
+
+            <div id="folderList" class="folder-list"></div>
+
+            <button id="addFolder" class="primary">
+                <span id="addFolderIcon"></span>
+                New Folder
+            </button>
+        </aside>
+
+        <div id="drawerOverlay" class="drawer-overlay"></div>
+
+        <!--old body code-->
         <header class="topbar">
+            <button id="drawerToggle" type="button" aria-label="Open folders">
+                ☰
+            </button>
+
             <div>
                 <h1>Task Tree</h1>
                 <div id="status">Saved</div>
