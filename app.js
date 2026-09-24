@@ -178,7 +178,14 @@ function renderTask(task) {
     foldButton.type = "button";
 
     if (task.children.length > 0) {
-        foldButton.textContent = task.expanded ? "▼" : "▶";
+        foldButton.appendChild(
+            createIcon(task.expanded ? "chevronDown" : "chevronRight"),
+        );
+
+        foldButton.setAttribute(
+            "aria-label",
+            task.expanded ? "Collapse task" : "Expand task",
+        );
 
         foldButton.addEventListener("click", () => {
             task.expanded = !task.expanded;
@@ -203,7 +210,14 @@ function renderTask(task) {
 
     checkButton.type = "button";
 
-    checkButton.textContent = task.completed ? "☑" : "☐";
+    checkButton.appendChild(
+        createIcon(task.completed ? "checkboxChecked" : "checkbox"),
+    );
+
+    checkButton.setAttribute(
+        "aria-label",
+        task.completed ? "Mark incomplete" : "Mark complete",
+    );
 
     checkButton.addEventListener("click", () => {
         task.completed = !task.completed;
@@ -233,7 +247,9 @@ function renderTask(task) {
 
     addButton.type = "button";
 
-    addButton.textContent = "＋";
+    addButton.appendChild(createIcon("plus"));
+
+    addButton.setAttribute("aria-label", "Add subtask");
 
     addButton.addEventListener("click", () => {
         addChildTask(task.id);
@@ -249,7 +265,9 @@ function renderTask(task) {
 
     editButton.type = "button";
 
-    editButton.textContent = "✎";
+    editButton.appendChild(createIcon("edit"));
+
+    editButton.setAttribute("aria-label", "Edit task");
 
     editButton.addEventListener("click", () => {
         openEditDialog(task.id);
@@ -265,7 +283,9 @@ function renderTask(task) {
 
     deleteButton.type = "button";
 
-    deleteButton.textContent = "🗑";
+    deleteButton.appendChild(createIcon("delete"));
+
+    deleteButton.setAttribute("aria-label", "Delete task");
 
     deleteButton.setAttribute("aria-label", "Delete task");
 

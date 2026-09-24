@@ -15,7 +15,10 @@
                 <div id="status">Saved</div>
             </div>
 
-            <button id="addRoot" class="primary">＋ Task</button>
+            <button id="addRoot" class="primary">
+                <span id="addRootIcon"></span>
+                Task
+            </button>
         </header>
 
         <main id="tree"></main>
@@ -23,7 +26,10 @@
         <div id="empty" class="empty">
             <div>No tasks yet</div>
 
-            <button id="emptyAdd" class="primary">Add your first task</button>
+            <button id="emptyAdd" class="primary">
+                <span id="emptyAddIcon"></span>
+                Add your first task
+            </button>
         </div>
 
         <dialog id="editDialog">
@@ -47,5 +53,6 @@
         </dialog>
 
         <script src="app.js"></script>
+        <script src="icons.js"></script>
     </body>
 </html>

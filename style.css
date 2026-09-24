@@ -327,3 +327,32 @@ dialog h2 {
 
     margin-top: 16px;
 }
+/* =========================
+   SVG ICONS
+   ========================= */
+
+.icon {
+    width: 20px;
+    height: 20px;
+
+    display: block;
+
+    pointer-events: none;
+    flex-shrink: 0;
+}
+
+.fold,
+.check,
+.add-child,
+.edit,
+.delete {
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+}
+
+.fold:disabled {
+    opacity: 0;
+    pointer-events: none;
+}
