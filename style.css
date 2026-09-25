@@ -5,7 +5,7 @@
 :root {
     color-scheme: dark;
 
-    --bg: #ff00ff;
+    --bg: #101114f5;
     --surface: #191b20;
     --border: #30343d;
 
@@ -135,6 +135,9 @@ button.primary {
     min-height: 48px;
 
     border-radius: 8px;
+
+    user-select: none;
+    -webkit-user-select: none;
 }
 
 .node-row:hover {
@@ -249,18 +252,6 @@ button.primary {
     color: var(--muted);
 
     font-size: 20px;
-}
-
-/* =========================
-   CHILDREN
-   ========================= */
-
-.node-children {
-    margin-left: 22px;
-
-    border-left: 1px solid var(--border);
-
-    padding-left: 4px;
 }
 
 /* =========================
@@ -380,12 +371,13 @@ dialog h2 {
 
 .drawer {
     position: fixed;
-
     top: 0;
     left: 0;
 
     width: 280px;
-    height: 100vh;
+    height: 100dvh;
+
+    box-sizing: border-box;
 
     z-index: 20;
 
@@ -395,12 +387,12 @@ dialog h2 {
     padding: 20px 14px;
 
     background: var(--surface);
-
     border-right: 1px solid var(--border);
 
     transform: translateX(-100%);
-
     transition: transform 180ms ease;
+
+    overflow-y: auto;
 }
 
 .drawer.open {
@@ -570,4 +562,29 @@ dialog h2 {
 
 #folderNameInput:focus {
     border-color: var(--text);
+}
+
+/* =========================
+   DISABLE TEXT CARET / SELECTION
+   ========================= */
+
+.title,
+.folder-name,
+.folder-actions,
+.drawer-header,
+.topbar h1,
+#status,
+.empty {
+    user-select: none;
+    -webkit-user-select: none;
+    caret-color: transparent;
+}
+
+/* =========================
+   TASK INDENTATION
+   ========================= */
+
+.node-children {
+    margin-left: 18px;
+    padding-left: 12px;
 }

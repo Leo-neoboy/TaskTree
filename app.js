@@ -446,6 +446,8 @@ function render() {
 function renderTask(task) {
     const node = document.createElement("div");
 
+    node.className = "node";
+
     const row = document.createElement("div");
 
     row.className = "node-row";
