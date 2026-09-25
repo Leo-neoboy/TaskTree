@@ -445,3 +445,129 @@ dialog h2 {
 #addFolder {
     width: 100%;
 }
+
+/* =========================
+   FOLDER ITEMS
+   ========================= */
+
+.folder-item {
+    width: 100%;
+
+    display: flex;
+    align-items: center;
+
+    min-height: 44px;
+
+    margin-bottom: 4px;
+
+    padding: 8px 10px;
+
+    background: transparent;
+
+    color: var(--text);
+
+    text-align: left;
+
+    border-radius: 8px;
+}
+
+.folder-item.active {
+    background: #252932;
+}
+
+.folder-name {
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+
+    white-space: nowrap;
+}
+
+/* =========================
+   FOLDER ACTIONS
+   ========================= */
+
+.folder-item {
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.folder-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+.folder-edit,
+.folder-delete {
+    width: 34px;
+    height: 34px;
+    padding: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: transparent;
+    border: 0;
+    border-radius: 6px;
+
+    color: var(--text);
+    font-size: 16px;
+
+    cursor: pointer;
+}
+
+.folder-edit:hover,
+.folder-delete:hover {
+    background: #ffffff12;
+}
+
+.folder-edit:active,
+.folder-delete:active {
+    transform: scale(0.94);
+}
+
+/* =========================
+   FOLDER DIALOG
+   ========================= */
+
+#folderDialog {
+    width: min(420px, calc(100vw - 32px));
+    padding: 24px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface);
+    color: var(--text);
+}
+
+#folderDialog::backdrop {
+    background: #0008;
+}
+
+#folderForm {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+#folderDialogTitle {
+    margin: 0;
+}
+
+#folderNameInput {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--background);
+    color: var(--text);
+    font: inherit;
+    outline: none;
+}
+
+#folderNameInput:focus {
+    border-color: var(--text);
+}

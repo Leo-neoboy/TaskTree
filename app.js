@@ -8,17 +8,47 @@ const drawer = document.getElementById("drawer");
 const drawerOverlay = document.getElementById("drawerOverlay");
 const drawerToggle = document.getElementById("drawerToggle");
 
+const addFolderButton = document.getElementById("addFolder");
+
 const dialog = document.getElementById("editDialog");
 const form = document.getElementById("editForm");
 const titleInput = document.getElementById("titleInput");
 const cancelButton = document.getElementById("cancel");
 
+const folderDialog = document.getElementById("folderDialog");
+const folderForm = document.getElementById("folderForm");
+const folderDialogTitle = document.getElementById("folderDialogTitle");
+const folderNameInput = document.getElementById("folderNameInput");
+const folderCancel = document.getElementById("folderCancel");
+
+let editingFolderId = null;
+
 let tasks = [];
 let editingTaskId = null;
 let creatingTaskId = null;
 
+let folders = [];
+
+let activeFolderId = null;
+
 loadTasks();
-//load task ends here
+
+if (folders.length === 0) {
+    initializeFolders();
+}
+
+function initializeFolders() {
+    const defaultFolder = {
+        id: "default",
+        name: "Default",
+        tasks: tasks,
+    };
+
+    folders = [defaultFolder];
+
+    activeFolderId = defaultFolder.id;
+}
+
 function openDrawer() {
     drawer.classList.add("open");
     drawerOverlay.classList.add("open");
@@ -33,6 +63,172 @@ drawerToggle.addEventListener("click", openDrawer);
 
 drawerOverlay.addEventListener("click", closeDrawer);
 
+const folderList = document.getElementById("folderList");
+
+function renderFolders() {
+    folderList.replaceChildren();
+
+    for (const folder of folders) {
+        const button = document.createElement("button");
+
+        button.className =
+            "folder-item" + (folder.id === activeFolderId ? " active" : "");
+
+        button.type = "button";
+
+        const name = document.createElement("span");
+
+        name.className = "folder-name";
+        name.textContent = folder.name;
+
+        const actions = document.createElement("span");
+
+        actions.className = "folder-actions";
+
+        const editButton = document.createElement("button");
+
+        editButton.className = "folder-edit";
+        editButton.type = "button";
+        editButton.textContent = "✏️";
+        editButton.setAttribute("aria-label", "Rename folder");
+
+        editButton.addEventListener("click", (event) => {
+            event.stopPropagation();
+
+            editingFolderId = folder.id;
+
+            folderDialogTitle.textContent = "Rename Folder";
+            folderNameInput.value = folder.name;
+
+            folderDialog.showModal();
+
+            setTimeout(() => {
+                folderNameInput.focus();
+                folderNameInput.select();
+            }, 50);
+        });
+
+        const deleteButton = document.createElement("button");
+
+        deleteButton.className = "folder-delete";
+        deleteButton.type = "button";
+        deleteButton.textContent = "🗑️";
+        deleteButton.setAttribute("aria-label", "Delete folder");
+
+        deleteButton.addEventListener("click", (event) => {
+            event.stopPropagation();
+
+            const confirmed = confirm(
+                `Delete folder "${folder.name}" and all its tasks?`,
+            );
+
+            if (!confirmed) {
+                return;
+            }
+
+            folders = folders.filter((item) => item.id !== folder.id);
+
+            // If this was the last folder, create a fresh Default folder.
+            if (folders.length === 0) {
+                const defaultFolder = {
+                    id: "default",
+                    name: "Default",
+                    tasks: [],
+                };
+
+                folders.push(defaultFolder);
+            }
+
+            if (activeFolderId === folder.id) {
+                activeFolderId = folders[0].id;
+            }
+
+            const activeFolder = folders.find(
+                (item) => item.id === activeFolderId,
+            );
+
+            tasks = activeFolder?.tasks || [];
+
+            saveTasks();
+            renderFolders();
+            render();
+        });
+
+        actions.append(editButton, deleteButton);
+
+        button.append(name, actions);
+
+        button.addEventListener("click", () => {
+            activeFolderId = folder.id;
+
+            tasks = folder.tasks;
+
+            saveTasks();
+
+            renderFolders();
+            render();
+
+            closeDrawer();
+        });
+
+        folderList.appendChild(button);
+    }
+}
+
+function createFolder() {
+    editingFolderId = null;
+
+    folderDialogTitle.textContent = "New Folder";
+    folderNameInput.value = "";
+
+    folderDialog.showModal();
+
+    setTimeout(() => {
+        folderNameInput.focus();
+    }, 50);
+}
+
+addFolderButton.addEventListener("click", createFolder);
+
+folderForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+
+    const folderName = folderNameInput.value.trim();
+
+    if (!folderName) {
+        folderNameInput.focus();
+        return;
+    }
+
+    if (editingFolderId) {
+        const folder = folders.find((item) => item.id === editingFolderId);
+
+        if (folder) {
+            folder.name = folderName;
+        }
+    } else {
+        folders.push({
+            id: createId(),
+            name: folderName,
+            tasks: [],
+        });
+    }
+
+    saveTasks();
+
+    folderDialog.close();
+
+    editingFolderId = null;
+
+    renderFolders();
+});
+
+folderCancel.addEventListener("click", () => {
+    folderDialog.close();
+
+    editingFolderId = null;
+});
+
 /* =========================
    STORAGE
    ========================= */
@@ -43,20 +239,74 @@ function loadTasks() {
 
         if (!saved) {
             tasks = [];
+            folders = [];
+            activeFolderId = null;
             return;
         }
 
         const data = JSON.parse(saved);
 
-        tasks = Array.isArray(data) ? data : [];
+        // =========================
+        // OLD FORMAT: tasks array
+        // =========================
+
+        if (Array.isArray(data)) {
+            tasks = data;
+
+            const defaultFolder = {
+                id: "default",
+                name: "Default",
+                tasks: tasks,
+            };
+
+            folders = [defaultFolder];
+
+            activeFolderId = "default";
+
+            // Save the migrated format immediately
+            saveTasks();
+
+            return;
+        }
+
+        // =========================
+        // NEW FORMAT: folders
+        // =========================
+
+        if (data && !Array.isArray(data) && Array.isArray(data.folders)) {
+            folders = data.folders;
+
+            activeFolderId = data.activeFolderId || folders[0]?.id || null;
+
+            const activeFolder = folders.find(
+                (folder) => folder.id === activeFolderId,
+            );
+
+            tasks = activeFolder?.tasks || [];
+
+            return;
+        }
+
+        tasks = [];
+        folders = [];
+        activeFolderId = null;
     } catch (error) {
         console.error("Could not load tasks:", error);
+
         tasks = [];
+        folders = [];
+        activeFolderId = null;
     }
 }
 
 function saveTasks() {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+    localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify({
+            folders: folders,
+            activeFolderId: activeFolderId,
+        }),
+    );
 
     status.textContent = "Saved";
 }
@@ -458,11 +708,19 @@ cancelButton.addEventListener("click", () => {
    ========================= */
 
 function addRootTask() {
+    const activeFolder = folders.find((folder) => folder.id === activeFolderId);
+
+    if (!activeFolder) {
+        return;
+    }
+
     const task = createTask();
 
     creatingTaskId = task.id;
 
-    tasks.push(task);
+    activeFolder.tasks.push(task);
+
+    tasks = activeFolder.tasks;
 
     saveTasks();
 
@@ -480,3 +738,4 @@ document.getElementById("emptyAdd").addEventListener("click", addRootTask);
    ========================= */
 
 render();
+renderFolders();
