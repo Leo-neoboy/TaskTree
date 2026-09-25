@@ -47,6 +47,8 @@ function initializeFolders() {
     folders = [defaultFolder];
 
     activeFolderId = defaultFolder.id;
+
+    saveTasks();
 }
 
 function openDrawer() {
@@ -69,12 +71,10 @@ function renderFolders() {
     folderList.replaceChildren();
 
     for (const folder of folders) {
-        const button = document.createElement("button");
+        const folderItem = document.createElement("div");
 
-        button.className =
+        folderItem.className =
             "folder-item" + (folder.id === activeFolderId ? " active" : "");
-
-        button.type = "button";
 
         const name = document.createElement("span");
 
@@ -126,6 +126,10 @@ function renderFolders() {
                 return;
             }
 
+            const deletedFolderIndex = folders.findIndex(
+                (item) => item.id === folder.id,
+            );
+
             folders = folders.filter((item) => item.id !== folder.id);
 
             // If this was the last folder, create a fresh Default folder.
@@ -139,8 +143,15 @@ function renderFolders() {
                 folders.push(defaultFolder);
             }
 
+            // If the deleted folder was active,
+            // go to the folder immediately above it.
             if (activeFolderId === folder.id) {
-                activeFolderId = folders[0].id;
+                const previousIndex = Math.min(
+                    deletedFolderIndex - 1,
+                    folders.length - 1,
+                );
+
+                activeFolderId = folders[previousIndex].id;
             }
 
             const activeFolder = folders.find(
@@ -156,9 +167,9 @@ function renderFolders() {
 
         actions.append(editButton, deleteButton);
 
-        button.append(name, actions);
+        folderItem.append(name, actions);
 
-        button.addEventListener("click", () => {
+        folderItem.addEventListener("click", () => {
             activeFolderId = folder.id;
 
             tasks = folder.tasks;
@@ -171,7 +182,7 @@ function renderFolders() {
             closeDrawer();
         });
 
-        folderList.appendChild(button);
+        folderList.appendChild(folderItem);
     }
 }
 
@@ -207,11 +218,17 @@ folderForm.addEventListener("submit", (event) => {
             folder.name = folderName;
         }
     } else {
-        folders.push({
+        const newFolder = {
             id: createId(),
             name: folderName,
             tasks: [],
-        });
+        };
+
+        folders.push(newFolder);
+
+        activeFolderId = newFolder.id;
+
+        tasks = newFolder.tasks;
     }
 
     saveTasks();
@@ -221,11 +238,16 @@ folderForm.addEventListener("submit", (event) => {
     editingFolderId = null;
 
     renderFolders();
+    render();
 });
 
 folderCancel.addEventListener("click", () => {
     folderDialog.close();
 
+    editingFolderId = null;
+});
+
+folderDialog.addEventListener("cancel", () => {
     editingFolderId = null;
 });
 
@@ -276,12 +298,15 @@ function loadTasks() {
         if (data && !Array.isArray(data) && Array.isArray(data.folders)) {
             folders = data.folders;
 
-            activeFolderId = data.activeFolderId || folders[0]?.id || null;
-
-            const activeFolder = folders.find(
-                (folder) => folder.id === activeFolderId,
+            let activeFolder = folders.find(
+                (folder) => folder.id === data.activeFolderId,
             );
 
+            if (!activeFolder) {
+                activeFolder = folders[0] || null;
+            }
+
+            activeFolderId = activeFolder?.id || null;
             tasks = activeFolder?.tasks || [];
 
             return;
@@ -347,10 +372,12 @@ function findTask(list, id) {
             return task;
         }
 
-        const child = findTask(task.children, id);
+        if (Array.isArray(task.children)) {
+            const child = findTask(task.children, id);
 
-        if (child) {
-            return child;
+            if (child) {
+                return child;
+            }
         }
     }
 
@@ -371,28 +398,15 @@ function removeTask(list, id) {
     }
 
     for (const task of list) {
-        if (removeTask(task.children, id)) {
-            return true;
+        if (Array.isArray(task.children)) {
+            if (removeTask(task.children, id)) {
+                return true;
+            }
         }
     }
 
     return false;
 }
-
-/* =========================
-   COUNT DESCENDANTS
-   ========================= */
-
-function countDescendants(task) {
-    let count = task.children.length;
-
-    for (const child of task.children) {
-        count += countDescendants(child);
-    }
-
-    return count;
-}
-
 /* =========================
    DELETE TASK
    ========================= */
@@ -444,6 +458,10 @@ function render() {
    ========================= */
 
 function renderTask(task) {
+    if (!Array.isArray(task.children)) {
+        task.children = [];
+    }
+
     const node = document.createElement("div");
 
     node.className = "node";
@@ -703,6 +721,26 @@ cancelButton.addEventListener("click", () => {
     dialog.close();
 
     editingTaskId = null;
+});
+
+dialog.addEventListener("cancel", (event) => {
+    if (!creatingTaskId) {
+        editingTaskId = null;
+        return;
+    }
+
+    event.preventDefault();
+
+    removeTask(tasks, creatingTaskId);
+
+    saveTasks();
+
+    render();
+
+    creatingTaskId = null;
+    editingTaskId = null;
+
+    dialog.close();
 });
 
 /* =========================
