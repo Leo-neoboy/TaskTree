@@ -937,6 +937,21 @@ document.getElementById("addRoot").addEventListener("click", addRootTask);
 document.getElementById("emptyAdd").addEventListener("click", addRootTask);
 
 /* =========================
+   SYNC BETWEEN TABS
+   ========================= */
+
+window.addEventListener("storage", (event) => {
+    if (event.key !== STORAGE_KEY) {
+        return;
+    }
+
+    loadTasks();
+
+    render();
+    renderFolders();
+});
+
+/* =========================
    START
    ========================= */
 
