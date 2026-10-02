@@ -130,6 +130,7 @@ button.primary {
         minmax(0, 1fr)
         var(--iwidth)
         var(--iwidth)
+        var(--iwidth)
         var(--iwidth);
 
     align-items: center;
@@ -227,6 +228,35 @@ button.primary {
 
 .delete:active {
     color: var(--danger);
+}
+
+/* =========================
+   DRAG BUTTON
+   ========================= */
+
+.drag {
+    width: var(--iwidth);
+    height: var(--iheight);
+
+    padding: 0;
+
+    background: transparent;
+
+    color: var(--muted);
+
+    font-size: 18px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    cursor: grab;
+    touch-action: none;
+}
+
+.drag.dragging {
+    color: var(--accent);
+    cursor: grabbing;
 }
 
 /* =========================
@@ -581,4 +611,16 @@ dialog h2 {
 .node-children {
     margin-left: 25px;
     padding: 0px;
+}
+
+/* =========================
+   DRAG DROP INDICATOR
+   ========================= */
+
+.drop-indicator {
+    height: 2px;
+    margin: 0 4px;
+    background: var(--accent);
+    border-radius: 2px;
+    pointer-events: none;
 }

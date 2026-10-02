@@ -449,7 +449,7 @@ function render() {
     empty.classList.toggle("show", tasks.length === 0);
 
     for (const task of tasks) {
-        tree.appendChild(renderTask(task));
+        tree.appendChild(renderTask(task, tasks));
     }
 }
 
@@ -457,7 +457,7 @@ function render() {
    RENDER TASK
    ========================= */
 
-function renderTask(task) {
+function renderTask(task, siblingList) {
     if (!Array.isArray(task.children)) {
         task.children = [];
     }
@@ -469,7 +469,7 @@ function renderTask(task) {
     const row = document.createElement("div");
 
     row.className = "node-row";
-
+    row.dataset.taskId = task.id;
     /* =========================
        EXPAND / COLLAPSE
        ========================= */
@@ -595,6 +595,168 @@ function renderTask(task) {
     });
 
     /* =========================
+   DRAG HANDLE
+   ========================= */
+
+    const dragButton = document.createElement("button");
+
+    dragButton.className = "drag";
+
+    dragButton.type = "button";
+
+    dragButton.textContent = "↕";
+
+    dragButton.setAttribute("aria-label", "Drag task");
+
+    let dragTimer = null;
+    let isDragging = false;
+
+    dragButton.addEventListener("pointerdown", (event) => {
+        dragButton.setPointerCapture(event.pointerId);
+
+        dragTimer = setTimeout(() => {
+            isDragging = true;
+
+            dragButton.classList.add("dragging");
+
+            navigator.vibrate?.(50);
+        }, 500);
+    });
+
+    dragButton.addEventListener("pointermove", (event) => {
+        if (!isDragging) {
+            return;
+        }
+
+        const rows = [...document.querySelectorAll(".node-row")];
+
+        const siblingIds = siblingList.map((item) => item.id);
+
+        const targetRow = rows.find((row) => {
+            const rowTaskId = row.dataset.taskId;
+
+            return (
+                siblingIds.includes(rowTaskId) &&
+                event.clientY >= row.getBoundingClientRect().top &&
+                event.clientY <= row.getBoundingClientRect().bottom
+            );
+        });
+
+        if (!targetRow) {
+            return;
+        }
+
+        const rect = targetRow.getBoundingClientRect();
+
+        const middle = rect.top + rect.height / 2;
+
+        document.querySelectorAll(".drop-indicator").forEach((item) => {
+            item.remove();
+        });
+
+        const indicator = document.createElement("div");
+
+        indicator.className = "drop-indicator";
+
+        if (event.clientY < middle) {
+            targetRow.before(indicator);
+        } else {
+            targetRow.after(indicator);
+        }
+    });
+
+    dragButton.addEventListener("pointerup", (event) => {
+        clearTimeout(dragTimer);
+        dragTimer = null;
+
+        if (!isDragging) {
+            return;
+        }
+
+        const rows = [...document.querySelectorAll(".node-row")];
+
+        const siblingIds = siblingList.map((item) => item.id);
+
+        const targetRow = rows.find((row) => {
+            const rowTaskId = row.dataset.taskId;
+
+            return (
+                siblingIds.includes(rowTaskId) &&
+                event.clientY >= row.getBoundingClientRect().top &&
+                event.clientY <= row.getBoundingClientRect().bottom
+            );
+        });
+
+        if (!targetRow) {
+            isDragging = false;
+            dragButton.classList.remove("dragging");
+
+            document.querySelectorAll(".drop-indicator").forEach((item) => {
+                item.remove();
+            });
+
+            return;
+        }
+
+        const targetId = targetRow.dataset.taskId;
+
+        // Dropped on itself
+        if (targetId === task.id) {
+            isDragging = false;
+            dragButton.classList.remove("dragging");
+
+            document.querySelectorAll(".drop-indicator").forEach((item) => {
+                item.remove();
+            });
+
+            return;
+        }
+
+        const rect = targetRow.getBoundingClientRect();
+
+        const dropAfter = event.clientY >= rect.top + rect.height / 2;
+
+        // Remove dragged task first
+        const currentIndex = siblingList.findIndex(
+            (item) => item.id === task.id,
+        );
+
+        siblingList.splice(currentIndex, 1);
+
+        // Find target again after removal
+        const targetIndex = siblingList.findIndex(
+            (item) => item.id === targetId,
+        );
+
+        const insertIndex = dropAfter ? targetIndex + 1 : targetIndex;
+
+        siblingList.splice(insertIndex, 0, task);
+
+        // Remove indicator before rebuilding the tree
+        document.querySelectorAll(".drop-indicator").forEach((item) => {
+            item.remove();
+        });
+
+        saveTasks();
+        render();
+
+        isDragging = false;
+        dragButton.classList.remove("dragging");
+    });
+
+    dragButton.addEventListener("pointercancel", () => {
+        clearTimeout(dragTimer);
+        dragTimer = null;
+
+        isDragging = false;
+        dragButton.classList.remove("dragging");
+
+        document.querySelectorAll(".drop-indicator").forEach((item) => {
+            item.remove();
+        });
+    });
+
+    /* =========================
        BUILD ROW
        ========================= */
 
@@ -605,6 +767,7 @@ function renderTask(task) {
         addButton,
         editButton,
         deleteButton,
+        dragButton,
     );
 
     node.appendChild(row);
@@ -619,7 +782,7 @@ function renderTask(task) {
         children.className = "node-children";
 
         for (const child of task.children) {
-            children.appendChild(renderTask(child));
+            children.appendChild(renderTask(child, task.children));
         }
 
         node.appendChild(children);
